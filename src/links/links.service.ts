@@ -1,21 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import { Link, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class LinksService {
   constructor(private readonly prisma: PrismaService) {}
 
-  getLink(id: number) {
-    // TODO
+  getLink(id: number): Promise<Link | null> {
+    return this.prisma.link.findUnique({
+      where: { id },
+    });
   }
 
-  // TODO: UPDATE ARG TYPES
-  createLink(newLink: any) {
-    // TODO
+  async createLink(newLink: Prisma.LinkCreateInput) {
+    const importDynamic = new Function(
+      'modulePath',
+      'return import(modulePath)',
+    );
+    const { default: normalizeUrl } = await importDynamic('normalize-url');
+
+    return this.prisma.link.create({
+      data: {
+        ...newLink,
+        link: normalizeUrl(newLink.link),
+      },
+    });
   }
 
-  // TODO: UPDATE ARG TYPES
-  editLink(id: number, updatedLink: any) {
+  editLink(id: number, updatedLink: Prisma.LinkUpdateInput) {
     // TODO
   }
 
