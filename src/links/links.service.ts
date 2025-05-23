@@ -6,6 +6,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class LinksService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async normalizeUrlInput(url: string): Promise<string> {
+    const importDynamic = new Function(
+      'modulePath',
+      'return import(modulePath)',
+    );
+    const { default: normalizeUrl } = await importDynamic('normalize-url');
+
+    return normalizeUrl(url);
+  }
+
   getLink(id: number): Promise<Link | null> {
     return this.prisma.link.findUnique({
       where: { id },
@@ -13,29 +23,32 @@ export class LinksService {
   }
 
   async createLink(newLink: Prisma.LinkCreateInput) {
-    const importDynamic = new Function(
-      'modulePath',
-      'return import(modulePath)',
-    );
-    const { default: normalizeUrl } = await importDynamic('normalize-url');
-
     return this.prisma.link.create({
       data: {
         ...newLink,
-        link: normalizeUrl(newLink.link),
+        link: await this.normalizeUrlInput(newLink.link),
       },
     });
   }
 
-  editLink(id: number, updatedLink: Prisma.LinkUpdateInput) {
-    // TODO
+  async editLink(id: number, updatedLink: Prisma.LinkUpdateInput) {
+    const data = { ...updatedLink };
+
+    if (updatedLink.link) {
+      data.link = await this.normalizeUrlInput(updatedLink.link as string);
+    }
+
+    return this.prisma.link.update({ where: { id }, data });
   }
 
   deleteLink(id: number) {
-    // TODO
+    return this.prisma.link.delete({ where: { id } });
   }
 
-  toggleLinkVisibility(id: number) {
-    // TODO
+  toggleLinkVisibility(id: number, isEnabled: boolean) {
+    return this.prisma.link.update({
+      where: { id },
+      data: { isEnabled: !isEnabled }, // Flip isEnabled value
+    });
   }
 }
