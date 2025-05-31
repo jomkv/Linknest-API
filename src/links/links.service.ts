@@ -22,11 +22,12 @@ export class LinksService {
     });
   }
 
-  async createLink(newLink: Prisma.LinkCreateInput) {
+  async createLink(userId: number, newLink: Prisma.LinkCreateWithoutUserInput) {
     return this.prisma.link.create({
       data: {
         ...newLink,
         link: await this.normalizeUrlInput(newLink.link),
+        userId,
       },
     });
   }
