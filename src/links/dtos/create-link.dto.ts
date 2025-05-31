@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -18,4 +19,8 @@ export class CreateLinkDto {
   @IsBoolean()
   @IsOptional()
   isEnabled?: boolean;
+
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
 }

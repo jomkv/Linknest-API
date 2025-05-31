@@ -32,8 +32,8 @@ export class LinksController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  createLink(@Body() createLinkDto: CreateLinkDto) {
-    return this.linksService.createLink(createLinkDto);
+  createLink(@Body() { userId, ...createLinkDto }: CreateLinkDto) {
+    return this.linksService.createLink(userId, createLinkDto);
   }
 
   @Patch(':id')
