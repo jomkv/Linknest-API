@@ -16,12 +16,16 @@ export class UsersService {
     });
   }
 
-  findUser(googleId: string): Promise<User | null> {
+  findUserByDisplayName(displayName: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { displayName } });
+  }
+
+  findUserByGoogleId(googleId: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { googleId } });
   }
 
   async findOrCreateUser(userPayload: any): Promise<User> {
-    let user: User | null = await this.findUser(userPayload.id);
+    let user: User | null = await this.findUserByGoogleId(userPayload.id);
 
     if (!user) {
       user = await this.createUser(userPayload);

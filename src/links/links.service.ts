@@ -22,6 +22,10 @@ export class LinksService {
     });
   }
 
+  getUserLinks(userId: number): Promise<Link[] | []> {
+    return this.prisma.link.findMany({ where: { userId } });
+  }
+
   async createLink(userId: number, newLink: Prisma.LinkCreateWithoutUserInput) {
     return this.prisma.link.create({
       data: {
