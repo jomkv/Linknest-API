@@ -22,6 +22,6 @@ export class AuthController {
         500,
       );
 
-    return await this.authService.validateUser(userPayload);
+    return await this.authService.authenticate(userPayload);
   }
 }
