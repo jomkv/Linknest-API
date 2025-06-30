@@ -1,11 +1,11 @@
 import { Controller, Get, HttpException, Req, UseGuards } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from 'generated/prisma';
+import { type Profile } from 'passport-google-oauth20';
+import { AuthService } from './auth.service';
 
 @Controller()
 export class AuthController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Get('auth/google')
   @UseGuards(AuthGuard('google'))
@@ -14,7 +14,7 @@ export class AuthController {
   @Get('auth/google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleHandleRedirect(@Req() req) {
-    const userPayload = req.user;
+    const userPayload: Profile | undefined | null = req.user;
 
     if (!userPayload)
       throw new HttpException(
@@ -22,8 +22,6 @@ export class AuthController {
         500,
       );
 
-    const user: User = await this.usersService.findOrCreateUser(userPayload);
-
-    return user;
+    return await this.authService.validateUser(userPayload);
   }
 }
