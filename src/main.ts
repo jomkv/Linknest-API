@@ -8,6 +8,6 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api', { exclude: ['/api/auth/{*path}'] });
 
-  await app.listen(3000);
+  await app.listen(4040);
 }
 bootstrap();
