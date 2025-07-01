@@ -16,6 +16,10 @@ export class UsersService {
     });
   }
 
+  findUserById(userId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id: Number(userId) } });
+  }
+
   findUserByDisplayName(displayName: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { displayName } });
   }

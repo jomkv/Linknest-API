@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from 'generated/prisma';
-import { type Profile } from 'passport-google-oauth20';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-
-type AuthInput = Profile;
-type SignInData = { userId: string; displayName: string };
-type AuthResult = { accessToken: string; userId: string; displayName: string };
-type TokenPayload = { sub: string; displayName: string };
+import {
+  AuthInput,
+  SignInData,
+  AuthResult,
+  TokenPayload,
+} from 'src/common/@types/auth.types';
 
 @Injectable()
 export class AuthService {
