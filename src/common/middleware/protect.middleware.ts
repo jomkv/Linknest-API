@@ -9,7 +9,7 @@ import { UsersService } from 'src/users/users.service';
 import { TokenPayload } from '../@types/auth.types';
 
 @Injectable()
-export class OptionalProtectMiddleware implements NestMiddleware {
+export class ProtectMiddleware implements NestMiddleware {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,

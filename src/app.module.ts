@@ -1,10 +1,18 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LinksModule } from './links/links.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ProtectMiddleware } from './common/middleware/protect.middleware';
+import { LinksController } from './links/links.controller';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -14,8 +22,19 @@ import { UsersModule } from './users/users.module';
     }),
     AuthModule,
     UsersModule,
+    JwtModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ProtectMiddleware)
+      .exclude({
+        path: 'links/*id',
+        method: RequestMethod.GET,
+      })
+      .forRoutes(LinksController);
+  }
+}
