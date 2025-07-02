@@ -49,4 +49,9 @@ export class AuthController {
 
     return res.redirect(this.configService.get<string>('CLIENT_URL'));
   }
+
+  @Get('auth/me')
+  getMe(@Req() req: Request) {
+    // todo
+  }
 }
