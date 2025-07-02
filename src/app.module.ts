@@ -36,5 +36,9 @@ export class AppModule implements NestModule {
         method: RequestMethod.GET,
       })
       .forRoutes(LinksController);
+
+    consumer
+      .apply(ProtectMiddleware)
+      .forRoutes({ path: 'auth/me', method: RequestMethod.GET });
   }
 }
