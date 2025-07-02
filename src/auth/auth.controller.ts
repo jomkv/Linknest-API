@@ -52,6 +52,6 @@ export class AuthController {
 
   @Get('auth/me')
   getMe(@Req() req: Request) {
-    // todo
+    return req.user;
   }
 }
