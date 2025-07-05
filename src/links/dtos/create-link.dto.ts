@@ -19,8 +19,4 @@ export class CreateLinkDto {
   @IsBoolean()
   @IsOptional()
   isEnabled?: boolean;
-
-  @IsNumber()
-  @IsNotEmpty()
-  userId: number;
 }

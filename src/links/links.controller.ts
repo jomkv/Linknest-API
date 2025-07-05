@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,7 +16,8 @@ import { LinksService } from './links.service';
 import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
 import { LinkExistsPipe } from './pipes/link-exists.pipe';
-import { Link } from 'generated/prisma';
+import { Link, User } from 'generated/prisma';
+import { Request } from 'express';
 
 @Controller('links')
 export class LinksController {
@@ -32,8 +34,10 @@ export class LinksController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  createLink(@Body() { userId, ...createLinkDto }: CreateLinkDto) {
-    return this.linksService.createLink(userId, createLinkDto);
+  createLink(@Req() req: Request, @Body() createLinkDto: CreateLinkDto) {
+    const user = req.user as User;
+
+    return this.linksService.createLink(user.id, createLinkDto);
   }
 
   @Patch(':id')
