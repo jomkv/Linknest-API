@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Req,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -18,8 +19,10 @@ import { UpdateLinkDto } from './dtos/update-link.dto';
 import { LinkExistsPipe } from './pipes/link-exists.pipe';
 import { Link, User } from 'generated/prisma';
 import { Request } from 'express';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('links')
+@UseGuards(AuthGuard)
 export class LinksController {
   constructor(private readonly linksService: LinksService) {}
 

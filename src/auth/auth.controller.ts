@@ -6,25 +6,26 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { type Profile } from 'passport-google-oauth20';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
+import { AuthGuard } from './auth.guard';
 
-@Controller()
+@Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
 
-  @Get('auth/google')
-  @UseGuards(AuthGuard('google'))
+  @Get('google')
+  @UseGuards(PassportAuthGuard('google'))
   async googleRedirect() {}
 
-  @Get('auth/google/redirect')
-  @UseGuards(AuthGuard('google'))
+  @Get('google/redirect')
+  @UseGuards(PassportAuthGuard('google'))
   async googleHandleRedirect(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -50,7 +51,8 @@ export class AuthController {
     return res.redirect(this.configService.get<string>('CLIENT_URL'));
   }
 
-  @Get('auth/me')
+  @Get('me')
+  @UseGuards(AuthGuard)
   getMe(@Req() req: Request) {
     return req.user;
   }

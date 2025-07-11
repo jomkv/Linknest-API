@@ -3,14 +3,14 @@ import { UsersService } from './users.service';
 import { User } from 'generated/prisma';
 import { LinksService } from 'src/links/links.service';
 
-@Controller()
+@Controller('user')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly linksService: LinksService,
   ) {}
 
-  @Get('user/:displayName')
+  @Get(':displayName')
   async getProfile(@Param('displayName') displayName: string) {
     const user: User | null =
       await this.usersService.findUserByDisplayName(displayName);
