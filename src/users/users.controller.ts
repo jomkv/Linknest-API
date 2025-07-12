@@ -36,12 +36,22 @@ export class UsersController {
     const user: User | null =
       await this.usersService.findUserByDisplayName(displayName);
 
+    const currentUserPayload = this.requestService.getUserPayload();
+
     if (!user) {
       throw new HttpException('User not found.', 404);
     }
 
-    const userLinks = await this.linksService.getUserLinks(user.id);
+    const userLinks = await this.linksService.getUserLinks(user.id, {
+      includeHidden: false,
+    });
 
-    return { ...user, links: userLinks };
+    return {
+      ...user,
+      links: userLinks,
+      isOwner: currentUserPayload
+        ? Number(currentUserPayload.sub) === user.id
+        : false,
+    };
   }
 }
