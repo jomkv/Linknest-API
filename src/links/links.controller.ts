@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Req,
   UseGuards,
   UsePipes,
@@ -47,7 +48,7 @@ export class LinksController {
     return this.linksService.createLink(Number(user.sub), createLinkDto);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UsePipes(ValidationPipe)
   editLink(
     @Body() editLinkDto: UpdateLinkDto,
@@ -66,7 +67,7 @@ export class LinksController {
     };
   }
 
-  @Patch('id/toggle')
+  @Patch(':id/toggle')
   toggleLinkVisibility(@Param('id', ParseIntPipe, LinkExistsPipe) link: Link) {
     return this.linksService.toggleLinkVisibility(link.id, link.isEnabled);
   }
