@@ -20,11 +20,15 @@ import { LinkExistsPipe } from './pipes/link-exists.pipe';
 import { Link, User } from 'generated/prisma';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { RequestService } from 'src/common/services/request.service';
 
 @Controller('links')
 @UseGuards(AuthGuard)
 export class LinksController {
-  constructor(private readonly linksService: LinksService) {}
+  constructor(
+    private readonly linksService: LinksService,
+    private readonly requestService: RequestService,
+  ) {}
 
   @Get(':id')
   async getLink(@Param('id', ParseIntPipe) id: number) {
@@ -38,9 +42,9 @@ export class LinksController {
   @Post()
   @UsePipes(ValidationPipe)
   createLink(@Req() req: Request, @Body() createLinkDto: CreateLinkDto) {
-    const user = req.user as User;
+    const user = this.requestService.getUserPayload();
 
-    return this.linksService.createLink(user.id, createLinkDto);
+    return this.linksService.createLink(Number(user.sub), createLinkDto);
   }
 
   @Patch(':id')
@@ -53,8 +57,13 @@ export class LinksController {
   }
 
   @Delete(':id')
-  deleteLink(@Param('id', ParseIntPipe, LinkExistsPipe) link: Link) {
-    return this.linksService.deleteLink(link.id);
+  async deleteLink(@Param('id', ParseIntPipe, LinkExistsPipe) link: Link) {
+    const deletedLink: Link = await this.linksService.deleteLink(link.id);
+
+    return {
+      message: 'Link deleted',
+      data: deletedLink,
+    };
   }
 
   @Patch('id/toggle')
