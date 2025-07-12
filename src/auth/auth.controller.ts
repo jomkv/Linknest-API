@@ -12,12 +12,14 @@ import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { AuthGuard } from './auth.guard';
+import { RequestService } from 'src/common/services/request.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly requestService: RequestService,
   ) {}
 
   @Get('google')
@@ -53,7 +55,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(AuthGuard)
-  getMe(@Req() req: Request) {
-    return req.user;
+  getMe() {
+    return this.requestService.getUserPayload();
   }
 }

@@ -5,20 +5,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { TokenPayload } from 'src/common/@types/auth.types';
+import { RequestService } from 'src/common/services/request.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly requestService: RequestService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     try {
-      const user = request?.user as TokenPayload | undefined;
+      const userPayload = this.requestService.getUserPayload();
 
-      if (!user) {
-        return false;
+      if (!userPayload) {
+        throw new UnauthorizedException();
       }
     } catch {
       throw new UnauthorizedException();

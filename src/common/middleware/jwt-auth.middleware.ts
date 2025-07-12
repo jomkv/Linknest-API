@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { TokenPayload } from '../@types/auth.types';
 import { ConfigService } from '@nestjs/config';
+import { RequestService } from '../services/request.service';
 
 @Injectable()
 export class JwtAuthMiddleware implements NestMiddleware {
@@ -11,6 +12,7 @@ export class JwtAuthMiddleware implements NestMiddleware {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly requestService: RequestService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -25,7 +27,7 @@ export class JwtAuthMiddleware implements NestMiddleware {
         const user = await this.usersService.findUserById(payload.sub);
 
         if (user) {
-          req.user = user;
+          this.requestService.setUserPayload(payload);
         }
       } catch (err) {
         // Do nothing
