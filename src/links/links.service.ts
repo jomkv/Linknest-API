@@ -22,8 +22,19 @@ export class LinksService {
     });
   }
 
-  getUserLinks(userId: number): Promise<Link[] | []> {
-    return this.prisma.link.findMany({ where: { userId } });
+  getUserLinks(
+    userId: number,
+    options?: { includeHidden: boolean },
+  ): Promise<Link[] | []> {
+    const queryOpts: any = {
+      userId: userId,
+    };
+
+    if (options && options.includeHidden === false) {
+      queryOpts.isEnabled = true;
+    }
+
+    return this.prisma.link.findMany({ where: queryOpts });
   }
 
   async createLink(userId: number, newLink: Prisma.LinkCreateWithoutUserInput) {
