@@ -13,6 +13,7 @@ import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthMiddleware } from './common/middleware/jwt-auth.middleware';
 import { CommonModule } from './common/common.module';
+import { VerificationsModule } from './verifications/verifications.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommonModule } from './common/common.module';
     UsersModule,
     JwtModule,
     CommonModule,
+    VerificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
