@@ -4,12 +4,12 @@ import {
   ExecutionContext,
   InternalServerErrorException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable } from 'rxjs';
 import { RequestService } from 'src/common/services/request.service';
 import { LinksService } from '../links.service';
 import isNumeric from 'src/common/utils/is-numeric';
+import { RequestWithLink } from '../@types/request.types';
 
 @Injectable()
 export class LinkOwnerGuard implements CanActivate {
@@ -18,15 +18,20 @@ export class LinkOwnerGuard implements CanActivate {
     private readonly linksService: LinksService,
   ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+  /**
+   * Validates if id param exists and is valid, user exists, link exists, and if user is the owner of the link.
+   *
+   * @param context - Execution Context.
+   * @throws Varying error(s) if any of the checks fail.
+   * @returns Passes the found link onto the request (accesible via req.link).
+   */
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: RequestWithLink = context.switchToHttp().getRequest();
     const linkId: string | undefined = request.params.id;
 
     if (!linkId) {
       throw new InternalServerErrorException(
-        'LinkOwnerGuard: Route parameter "id" is required. Make sure this guard is used on routes with :id parameter.',
+        'LinkOwnerGuard: Route parameter "id" is required.',
       );
     }
 
@@ -36,30 +41,24 @@ export class LinkOwnerGuard implements CanActivate {
       );
     }
 
-    return this.validateLinkOwnership(Number(linkId));
-  }
-
-  /**
-   * Validates if user exists, link exists, and if user is the owner of the link.
-   *
-   * @param linkId ID of the link to be validated.
-   * @throws Link from ID is not found.
-   * @returns False if user not detected or if IDs dont match, True if IDs match.
-   */
-  private async validateLinkOwnership(linkId: number): Promise<boolean> {
     const user = this.requestService.getUserPayload();
-
     if (!user) {
-      return false;
+      throw new ForbiddenException('User not authenticated');
     }
 
-    const link = await this.linksService.getLink(linkId);
-
+    const link = await this.linksService.getLink(Number(linkId));
     if (!link) {
       throw new NotFoundException('Link not found');
     }
 
-    // Check if userId and link's userId matches
-    return Number(user.sub) === link.id;
+    // Check if userId matches with link's userId
+    if (Number(user.sub) !== link.userId) {
+      throw new ForbiddenException('You do not own this link');
+    }
+
+    // Attach the link to the request for later use
+    request.link = link;
+
+    return true;
   }
 }

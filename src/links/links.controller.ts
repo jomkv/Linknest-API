@@ -3,25 +3,20 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  Param,
-  ParseIntPipe,
   Patch,
   Post,
   Put,
-  Req,
   UseGuards,
-  UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { LinksService } from './links.service';
 import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
-import { LinkExistsPipe } from './pipes/link-exists.pipe';
-import { Link, User } from 'generated/prisma';
-import { Request } from 'express';
+import { Link } from 'generated/prisma';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RequestService } from 'src/common/services/request.service';
+import { LinkOwnerGuard } from './guards/link-owner.guard';
+import { LinkParam } from './decorators/link.decorator';
 
 @Controller('links')
 @UseGuards(AuthGuard)
@@ -32,33 +27,30 @@ export class LinksController {
   ) {}
 
   @Get(':id')
-  async getLink(@Param('id', ParseIntPipe) id: number) {
-    const link: Link | null = await this.linksService.getLink(id);
-
-    if (!link) throw new HttpException('Link not found.', 404);
-
+  @UseGuards(LinkOwnerGuard)
+  async getLink(@LinkParam() link: Link) {
     return link;
   }
 
   @Post()
-  @UsePipes(ValidationPipe)
-  createLink(@Req() req: Request, @Body() createLinkDto: CreateLinkDto) {
+  createLink(@Body(ValidationPipe) createLinkDto: CreateLinkDto) {
     const user = this.requestService.getUserPayload();
 
     return this.linksService.createLink(Number(user.sub), createLinkDto);
   }
 
   @Put(':id')
-  @UsePipes(ValidationPipe)
+  @UseGuards(LinkOwnerGuard)
   editLink(
-    @Body() editLinkDto: UpdateLinkDto,
-    @Param('id', ParseIntPipe, LinkExistsPipe) link: Link,
+    @Body(ValidationPipe) editLinkDto: UpdateLinkDto,
+    @LinkParam() link: Link,
   ) {
     return this.linksService.editLink(link.id, editLinkDto);
   }
 
   @Delete(':id')
-  async deleteLink(@Param('id', ParseIntPipe, LinkExistsPipe) link: Link) {
+  @UseGuards(LinkOwnerGuard)
+  async deleteLink(@LinkParam() link: Link) {
     const deletedLink: Link = await this.linksService.deleteLink(link.id);
 
     return {
@@ -68,7 +60,8 @@ export class LinksController {
   }
 
   @Patch(':id/toggle')
-  toggleLinkVisibility(@Param('id', ParseIntPipe, LinkExistsPipe) link: Link) {
+  @UseGuards(LinkOwnerGuard)
+  toggleLinkVisibility(@LinkParam() link: Link) {
     return this.linksService.toggleLinkVisibility(link.id, link.isEnabled);
   }
 }
