@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { LinksModule } from 'src/links/links.module';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
-import { GoogleStrategy } from './google.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
