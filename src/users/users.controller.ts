@@ -8,7 +8,7 @@ import {
 import { UsersService } from './users.service';
 import { User } from 'generated/prisma';
 import { LinksService } from 'src/links/links.service';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RequestService } from 'src/common/services/request.service';
 
 @Controller('user')

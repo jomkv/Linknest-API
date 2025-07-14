@@ -11,7 +11,7 @@ import { type Profile } from 'passport-google-oauth20';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 import { RequestService } from 'src/common/services/request.service';
 import { UsersService } from 'src/users/users.service';
 

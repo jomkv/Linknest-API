@@ -13,7 +13,7 @@ import { LinksService } from './links.service';
 import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
 import { Link } from 'generated/prisma';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RequestService } from 'src/common/services/request.service';
 import { LinkOwnerGuard } from './guards/link-owner.guard';
 import { LinkParam } from './decorators/link.decorator';
