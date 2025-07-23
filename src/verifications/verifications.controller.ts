@@ -2,7 +2,6 @@ import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { VerificationsService } from './verifications.service';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { Profile as GithubProfile } from 'passport-github2';
 
 @Controller('verifications')
 export class VerificationsController {

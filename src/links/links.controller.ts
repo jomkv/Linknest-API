@@ -6,6 +6,8 @@ import {
   Patch,
   Post,
   Put,
+  Res,
+  UnprocessableEntityException,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -17,6 +19,9 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RequestService } from 'src/common/services/request.service';
 import { LinkOwnerGuard } from './guards/link-owner.guard';
 import { LinkParam } from './decorators/link.decorator';
+import { VerificationsService } from 'src/verifications/verifications.service';
+import { Providers } from 'src/common/@types/providers.types';
+import { Response } from 'express';
 
 @Controller('links')
 @UseGuards(AuthGuard)
@@ -24,6 +29,7 @@ export class LinksController {
   constructor(
     private readonly linksService: LinksService,
     private readonly requestService: RequestService,
+    private readonly verificationService: VerificationsService,
   ) {}
 
   @Get(':id')
@@ -63,5 +69,18 @@ export class LinksController {
   @UseGuards(LinkOwnerGuard)
   toggleLinkVisibility(@LinkParam() link: Link) {
     return this.linksService.toggleLinkVisibility(link.id, link.isEnabled);
+  }
+
+  @Patch(':id/verify')
+  @UseGuards(LinkOwnerGuard)
+  verifyLink(@LinkParam() link: Link, @Res() res: Response) {
+    const domain: Providers | null =
+      this.verificationService.getAllowedProvider(link.link);
+
+    if (!domain) {
+      throw new UnprocessableEntityException("Link's domain is unsupported.");
+    }
+
+    return res.redirect(`/verifications/${domain}?link_id=${link.id}`);
   }
 }

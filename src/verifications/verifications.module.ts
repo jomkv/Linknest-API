@@ -15,5 +15,6 @@ import { YoutubeStrategy } from './strategies/youtube.strategy';
     DiscordStrategy,
     YoutubeStrategy,
   ],
+  exports: [VerificationsService],
 })
 export class VerificationsModule {}
