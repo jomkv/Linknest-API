@@ -22,6 +22,7 @@ import { LinkParam } from './decorators/link.decorator';
 import { VerificationsService } from 'src/verifications/verifications.service';
 import { Providers } from 'src/common/@types/providers.types';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('links')
 @UseGuards(AuthGuard)
@@ -30,6 +31,7 @@ export class LinksController {
     private readonly linksService: LinksService,
     private readonly requestService: RequestService,
     private readonly verificationService: VerificationsService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Get(':id')
@@ -71,7 +73,7 @@ export class LinksController {
     return this.linksService.toggleLinkVisibility(link.id, link.isEnabled);
   }
 
-  @Patch(':id/verify')
+  @Get(':id/verify-link')
   @UseGuards(LinkOwnerGuard)
   verifyLink(@LinkParam() link: Link, @Res() res: Response) {
     const domain: Providers | null =
@@ -81,6 +83,9 @@ export class LinksController {
       throw new UnprocessableEntityException("Link's domain is unsupported.");
     }
 
-    return res.redirect(`/verifications/${domain}?link_id=${link.id}`);
+    return {
+      data: `${this.configService.get<string>('BASE_URL')}/verifications/${domain}?link_id=${link.id}`,
+      message: 'Link verifiable, please use the given url to verify the link.',
+    };
   }
 }
