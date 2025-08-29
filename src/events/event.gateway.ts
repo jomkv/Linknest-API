@@ -11,9 +11,9 @@ import { Socket, Server } from 'socket.io';
 import { WS_SESSION_MESSAGE } from 'src/common/constants/socket-messages.constants';
 
 @WebSocketGateway({
-  transports: ['websocket'],
+  // transports: ['websocket'],
   cors: {
-    origin: 'http://localhost:3000',
+    origin: '*',
     credentials: true,
   },
 })
@@ -33,6 +33,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const sessionId = this.sessionMap.get(socket.id);
 
     if (sessionId) {
+      console.info(`Session Terminated: ${sessionId}`);
       this.cleanupSession(sessionId);
     }
   }
@@ -44,6 +45,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     this.sessionMap.set(socket.id, sessionId);
     this.reverseSessionMap.set(sessionId, socket.id);
+
+    console.info(`Session Started: ${sessionId}`);
 
     socket.emit(WS_SESSION_MESSAGE.REGISTERED, { sessionId });
   }

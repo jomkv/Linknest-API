@@ -14,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthMiddleware } from './common/middleware/jwt-auth.middleware';
 import { CommonModule } from './common/common.module';
 import { VerificationsModule } from './verifications/verifications.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { VerificationsModule } from './verifications/verifications.module';
     JwtModule,
     CommonModule,
     VerificationsModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
