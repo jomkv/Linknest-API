@@ -8,12 +8,17 @@ import {
   AuthResult,
   TokenPayload,
 } from 'src/common/@types/auth.types';
+import { RedisService } from 'src/redis/redis.service';
+import { EventsGateway } from 'src/events/event.gateway';
+import { WS_AUTH_MESSAGE } from 'src/common/constants/socket-messages.constants';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly redisService: RedisService,
+    private readonly eventsGateway: EventsGateway,
   ) {}
 
   async authenticate(input: AuthInput): Promise<AuthResult> {
@@ -46,5 +51,13 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken, displayName, userId };
+  }
+
+  async emitSuccess(nonce: string) {
+    const sessionId = await this.redisService.get(`nonce:${nonce}`);
+
+    if (!sessionId) return;
+
+    this.eventsGateway.emitToSession(sessionId, WS_AUTH_MESSAGE.COMPLETE, {});
   }
 }

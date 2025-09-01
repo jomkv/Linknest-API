@@ -14,6 +14,7 @@ import { Request, Response } from 'express';
 import { AuthGuard } from './guards/auth.guard';
 import { RequestService } from 'src/common/services/request.service';
 import { UsersService } from 'src/users/users.service';
+import { SessionGoogleGuard } from './guards/session-google.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +26,7 @@ export class AuthController {
   ) {}
 
   @Get('google')
-  @UseGuards(PassportAuthGuard('google'))
+  @UseGuards(SessionGoogleGuard)
   async googleRedirect() {}
 
   @Get('google/redirect')
@@ -35,6 +36,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const userPayload = req.user as Profile | undefined | null;
+    const nonce = req.query.state;
 
     if (!userPayload) {
       throw new HttpException(
@@ -45,6 +47,8 @@ export class AuthController {
 
     const { accessToken } = await this.authService.authenticate(userPayload);
 
+    await this.authService.emitSuccess(nonce as string);
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: this.configService.get<string>('NODE_ENV') === 'production',
@@ -52,7 +56,9 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
-    return res.redirect(this.configService.get<string>('CLIENT_URL'));
+    return res.redirect(
+      this.configService.get<string>('CLIENT_URL') + '/login-success',
+    );
   }
 
   @Get('me')

@@ -1,28 +1,33 @@
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { RequestService } from 'src/common/services/request.service';
-import { Observable } from 'rxjs';
+import { RedisService } from 'src/redis/redis.service';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { SessionNonceKey } from 'src/common/@types/auth.types';
 
 @Injectable()
-export class CustomGoogleGuard
+export class SessionGoogleGuard
   extends AuthGuard('google')
   implements CanActivate
 {
-  constructor(private readonly requestService: RequestService) {
+  constructor(
+    private readonly requestService: RequestService,
+    private readonly redisService: RedisService,
+  ) {
     super();
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
-    const sessionId = request.query.id as string;
+    const sessionId = request.query.session as string;
 
     const nonce = crypto.randomUUID();
+    const nonceKey: SessionNonceKey = `nonce:${nonce}`;
 
-    await this.saveNonce(nonce, sessionId);
+    await this.redisService.set(nonceKey, sessionId);
 
-    this.requestService.setSessionNonce(nonce); // error here
+    this.requestService.setSessionNonce(nonce);
 
     // Delegate logic onto parent guard
     return super.canActivate(context) as boolean | Promise<boolean>;
@@ -33,11 +38,7 @@ export class CustomGoogleGuard
 
     return {
       scope: ['profile', 'email'],
-      state: this.requestService.getSessionNonce(), // error here
+      state: this.requestService.getSessionNonce(),
     };
-  }
-
-  saveNonce(nonce: string, sessionId: string) {
-    // todo: save nonce at redis
   }
 }

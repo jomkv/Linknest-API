@@ -11,3 +11,5 @@ export type AuthResult = {
 };
 
 export type TokenPayload = { sub: string; displayName: string };
+
+export type SessionNonceKey = `nonce:${string}`;
